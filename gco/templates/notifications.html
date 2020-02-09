@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container jumbotron">
+  <h1 class="text-center">Notifications</h1>
+  <div>
+	{% if not notif_list %}
+	<p style="text-align:center; color: gray"><img height="100px" src="../static/img/wumpus.png">
+	It's okay! Wumpus doesn't have any notifications either...</p><br>
+	{% else %}
+		<table class="table table-hover" style="margin:auto; max-width:50%;">
+		<tbody>
+			{% for row in notif_list %}
+				{% if row[2] == "FriendRequest" %}
+				<tr>
+				  <th><img class="rounded-circle profile-img" src="static/img/avi/{{ row[1] + row[2] }}" style="height: 50px; width: 50px; "></th>
+				  <td><a href="users/{{ row[0] }}">{{ row[1] }}</a></td><td></td><td>
+				  {% elif row[0] in notif_list %}
+					<form method=post enctype='multipart/form-data' novalidate>
+					  <input type=hidden name="friend_button" value="[{{ row[0] }}, 'Accept Friend Request']">
+					  <input type=submit class="btn btn-success" name="friend_button" value="Accept Friend Request" style="max-width: 250px; margin:auto;"></form></td><td>
+						<form method=post enctype='multipart/form-data' novalidate>
+					  <input type=hidden name="friend_button" value="[{{ row[0] }}, 'Decline Friend Request']">
+					  <input type=submit class="btn btn-danger" name="friend_button" value="Decline Friend Request" style="max-width: 250px; margin:auto;"></form></td>
+			  {% endif %}
+			</tr>
+			  {% elif row[1] == "GameRequest" %}
+
+			  {% elif row[1] == "Timeout" %}
+
+			  {% endif %}
+			{% endfor %}
+		{% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

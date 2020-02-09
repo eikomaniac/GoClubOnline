@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="content-section jumbotron text" style="max-height: 900%">
+  <div class="media">
+    <img class="rounded-circle profile-img" src="static/img/avi/{{ file_name }}">
+    <div class="media-body" style="padding-left:50px">
+      <h2 class="profile-heading">{{ session.username }} {% if session.username in admins %}<div class="btn btn-info"><b>TEACHER</b></div>{% endif %}</h2>
+      <p class="text-secondary text-right" style="max-width: 500px">Account created: {{ date }}</p>
+    </div>
+  </div>
+</div>
+<div class="media text-center">
+  <div class="container" style="height: 365px; max-width: 30%;background-color: #e9ecef; border-radius: .25rem;">
+    <h3 style="padding: 15px">Profile Details</h3>
+    <form method=post enctype='multipart/form-data' novalidate>
+      <dl>
+        <dd>Update Password<input type=password class="form-control" name="password" placeholder="Password" maxlength="255" value="{{ request.form.password }}" style="max-width: 250px; margin:auto;">
+        <dd>Update Profile Picture</dd>
+          <input type="file" name="file" accept="image/x-png,image/gif,image/jpeg,image/jpg" style="padding-left:35px; padding-bottom:10px">
+        <dd>Current Password<input type=password class="form-control" name="current_password" placeholder="Current password" maxlength="255" value="{{ request.form.currentPassword }}" style="max-width: 250px; margin:auto;" autofocus>
+      </dl>
+      <input type=submit class="btn btn-md btn-primary btn-block" value=Update style="max-width: 250px; margin:auto;">
+    </form>
+  </div>
+  <div <div class="container media-body" style="height: 365px; background-color: #d3d9df; border-radius: .25rem;">
+    <h3 style="padding: 15px">Stats</h3>
+    <b>Wins: </b>{{ wins }}<br>
+    <b>Losses: </b>{{ total_games-wins }}<br>
+    {% if total_games != 0 %}
+    <b>Win rate: </b>{{ wins/total_games*100|round(2) }}%<br>
+    {% endif %}
+    <b>Rating: </b>{{ rating|int }}<br>
+    <b>Total moves made: </b>{{ moves_made }}<br>
+    <b>Total prisoners: </b>{{ prisoners }}<br>
+  </div>
+</div>
+
+{% endblock %}

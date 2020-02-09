@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="container text-center">
+  <h1>Login</h1>
+  <form method=post>
+    <dl>
+      <dd><input type=text class="form-control" name="username" placeholder="Username" maxlength="20" value="{{ request.form.username }}" autofocus></dd>
+      <dd><input type=password class="form-control" name="password" placeholder="Password" maxlength="255" value="{{ request.form.password }}"></dd>
+    </dl>
+    <p><input type=submit class="btn btn-md btn-primary btn-block" value=Login></p><br>
+	<a href="{{ url_for('forgotten_password') }}">Forgotten Password?</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container jumbotron">
+  <h1 class="text-center">Leaderboard</h1>
+  <div><br><form method=post novalidate>
+    <div class="dropdown" style="margin-bottom:10px;">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Sort by {{ request.args.get('sb').capitalize() }}
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="?sb=rating">Rating</a>
+        <a class="dropdown-item" href="?sb=games">Games Played</a>
+        <a class="dropdown-item" href="?sb=moves">Total Moves</a>
+        <a class="dropdown-item" href="?sb=prisoners">Total Prisoners</a>
+      </div>
+    </div></form>
+	<table class="table">
+	  <thead class="thead-dark">
+		<tr>
+		  <th scope="col">Rank</th>
+		  <th scope="col">User</th>
+		  <th scope="col">Rating</th>
+		  <th scope="col">Games Played</th>
+		  <th scope="col">Total Moves</th>
+		  <th scope="col">Total Prisoners</th>
+		</tr>
+	  </thead>
+	  <tbody>
+    {% set rank_count = 1 %}
+		{% for row in users %}
+    <tr>
+      <td scope="row"><b>{{ ranks[users.index(row)] }}</b></td>
+      <td scope="row">{{ row[0] }}</td>
+      <td scope="row">{{ row[1]|int }}</td>
+      <td scope="row">{{ row[2] }}</td>
+      <td scope="row">{{ row[3] }}</td>
+      <td scope="row">{{ row[4] }}</td>
+    </tr>
+		{% endfor %}
+	  </tbody>
+	</table>
+  </div>
+</div>
+{% endblock %}

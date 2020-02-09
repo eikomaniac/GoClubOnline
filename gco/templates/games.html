@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container jumbotron">
+  <h1 class="text-center">My Games</h1>
+  <!-- <form class="form-inline mt-2 mt-md-0" method=post>
+    <div style="margin:auto;">
+        <input class="form-control mr-sm-2" type="text" placeholder="Opponent" name="search" value="{{ request.form.search }}" autofocus>
+        <input type=submit class="btn btn-outline-dark my-2 my-sm-0" value=Search>
+    </div>
+  </form><br> -->
+  <div><br>
+  <h3 class="text-center">Live Games</h3>
+	<table class="table">
+	  <thead class="thead-dark">
+		<tr>
+		  <th scope="col">Game ID</th>
+		  <th scope="col">Opponent</th>
+		  <th scope="col">Player To Move</th>
+		  <th scope="col"></th>
+		</tr>
+	  </thead>
+	  <tbody>
+		{% for row in my_live_games %}
+		<tr>
+		  <th scope="row">{{ row[0] }}</th>
+		  <td><a href="{{ url_for('users') + '/' + row[3]|string }}">{{ row[1] }}</a></td>
+		  {% if row[2] == session.username %}
+			<td><div class="text-center" style="color: white; width:40px; padding:2px; border-radius:25%; background-color: #18B5B5;"><b>YOU</b></div></td>
+			{% else %}
+		  <td>{{ row[2] }}</td>
+		  {% endif %}
+		  <th scope="row"><button class="btn btn-success" onclick="window.location.href='{{ url_for('games') + '/' + row[0]|string }}'">Go to Game</button></th>
+		</tr>
+		{% endfor %}
+	  </tbody>
+	</table><br>
+	<h3 class="text-center">My Friends' Live Games</h3>
+  <table class="table">
+	  <thead class="thead-light">
+		<tr>
+		  <th scope="col">Game ID</th>
+		  <th scope="col">Opponent</th>
+		  <th scope="col">Player To Move</th>
+		  <th scope="col"></th>
+		</tr>
+	  </thead>
+	  <tbody>
+		{% for row in my_friends_live_games %}
+		<tr>
+		  <th scope="row">{{ row[0] }}</th>
+		  <td><a href="{{ url_for('users') + '/' + row[3]|string }}">{{ row[1] }}</a></td>
+		  {% if row[2] == session.username %}
+			<td><div class="text-center" style="color: white; width:40px; padding:2px; border-radius:25%; background-color: #18B5B5;"><b>YOU</b></div></td>
+			{% else %}
+		  <td>{{ row[2] }}</td>
+		  {% endif %}
+		  <th scope="row"><button class="btn btn-success" onclick="window.location.href='{{ url_for('games') + '/' + row[0]|string }}'">Go to Game</button></th>
+		</tr>
+		{% endfor %}
+	  </tbody>
+	</table><br>
+	<h3 class="text-center">My Past Games</h3>
+	<table class="table">
+	  <thead class="thead-light">
+		<tr>
+		  <th scope="col">Game ID</th>
+		  <th scope="col">Opponent</th>
+		  <th scope="col">Winner</th>
+		  <th scope="col"></th>
+		</tr>
+	  </thead>
+    <tbody>
+		{% for row in my_past_games %}
+		<tr>
+		  <th scope="row">{{ row[0] }}</th>
+		  <td><a href="{{ url_for('users') + '/' + row[3]|string }}">{{ row[1] }}</a></td>
+		  {% if row[2] == session.username %}
+			<td><div class="text-center" style="color: white; width:40px; padding:2px; border-radius:25%; background-color: #18B5B5;"><b>YOU</b></div></td>
+			{% else %}
+		  <td>{{ row[2] }}</td>
+		  {% endif %}
+		  <th scope="row"><button class="btn btn-primary" onclick="window.location.href='{{ url_for('games') + '/' + row[0]|string }}'">View Board</button></th>
+		</tr>
+		{% endfor %}
+	  </tbody>
+	</table>
+  </div>
+</div>
+{% endblock %}

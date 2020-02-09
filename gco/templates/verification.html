@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="container text-center">
+  <h1>Verify your account</h1>
+  <div class="container media-body text-left" style="height: 60px; display: inline-block; width:500px; padding-top: 10px; background-color: #dcdcdc; border-radius: .25rem;">
+   <h6 class="text-center">Please input the verification code that has been sent to your email.</h6>
+</div><br><br>
+  <form method=post>
+    <dl>
+      <dd><input type=text class="form-control" name="verification_code" placeholder="Verification code" maxlength="5" value="{{ request.form.verification_code }}" autofocus></dd>
+    </dl>
+    <p><input type=submit class="btn btn-md btn-primary btn-block" value=Login></p><br>
+    <h6 class="text-center">Not received the verification code? Click <a href="{{ url_for('register_teacher') }}">here</a> to register again</h6>
+  </form>
+</div>
+{% endblock %}

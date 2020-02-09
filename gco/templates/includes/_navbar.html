@@ -1,0 +1,73 @@
+<header class="site-header">
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand mr-4" href="/" style="padding-left: 8px"><img src="../static/img/logo.png" width="30" height="30" class="d-inline-block align-top" alt=""> GCO</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarToggle">
+        <div class="navbar-nav mr-auto">
+          <a class="nav-item nav-link" href="{{ url_for('index') }}">Home</a>
+          <a class="nav-item nav-link" href="{{ url_for('leaderboard') + "?sb=rating" }}">Leaderboard</a>
+          {% if session.logged_in %}
+            <a class="nav-item nav-link" href="{{ url_for('users') }}">Users</a>
+            {% if not session.is_admin %}
+              <a class="nav-item nav-link" href="{{ url_for('friends') }}">Friends</a>
+            {% endif %}
+            <a class="nav-item nav-link" href="{{ url_for('games') }}">Games {% if gamesNo > 0 %}<div style="border-radius: 25%; background-color: #18B5B5; display: inline;
+              padding: 2px"><b style="color:white">{{ gamesNo }}</b></div>{% endif %}</a>
+          {% endif %}
+        </div>
+        <div class="navbar-nav">
+          {% if session.logged_in %}
+                <div class="notification">
+                    <i class="fa fa-bell-o"></i>
+                    {% if notificationsNo > 0 %}
+                    <div class="notify-count count1 common-count" count="{{ notificationsNo }}">
+                        <div class="value">{{ notificationsNo }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="notification-dropdown dd">
+                    <div class="arrow-up"></div>
+                    <div class="header">
+                      <div class="container">
+                        <div class="text fl">Notifications</div>
+                        <div class="notify-count common-count count2 fl" count="{{ notificationsNo }}">
+                            <div class="value">{{ notificationsNo }}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="items">
+                      {% for notif in notifications %}
+                      <a href="{{ url_for('users') }}/{{ notif[0] }}">
+                        <div style="height:60px" class="list-item noti">
+                              <img class="image fl" src="../static/img/avi/{{ notif[2] + notif[3] }}">
+                              <div class="text fl"><b>{{ notif[2] }}</b>{{ notif[1] }}</div>
+                        </div>
+                      </a>
+                      {% endfor %}
+                      {% if notificationsNo == 0 %}
+                      <div style="height:125px"> <p style="text-align:center; color: gray; padding-top:5px"><img height="75px" src="../static/img/wumpus.png"></p>
+                        <p style="text-align:center; color: gray; font-size:13px">
+                        It's okay! Wumpus doesn't have any notifications either...</p>
+                      </div>
+                      {% endif %}
+                    </div>
+                </div>
+            <!--{# <a class="nav-item nav-link" href="{{ url_for('notifications') }}">Notifications {% if notificationsNo > 0 %}<div style="border-radius: 5px; background-color: #fa3e3e; display: inline;
+              padding: 4px"><b>{{ notificationsNo }}</b></div></a>{% endif %} #}-->
+            {% if session.is_admin %}
+              <a class="nav-item nav-link" href="{{ url_for('register_student') }}">Register Student</a>
+            {% endif %}
+            <a class="nav-item nav-link" href="{{ url_for('account') }}">{{ session.username }}</a>
+            <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+          {% else %}
+            <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
+            <a class="nav-item nav-link" href="{{ url_for('register_teacher') }}">Register</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>

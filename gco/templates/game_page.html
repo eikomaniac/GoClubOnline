@@ -1,0 +1,465 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+  <div style="height:857px;" class="container jumbotron text-center pt-4">
+  <div style="background-color: #d3d9df; display:inline-block; padding:10px; height:70px; border-radius:10px" class="text-center">
+    <img class="rounded-circle " src="../static/img/avi/{{ playerOne_username + p1image }}" style="margin-top:-25px; margin-right:5px; height: 50px; width: 50px; ">
+    <h1 style="display:inline-block">{{ playerOne_username }} vs. {{ playerTwo_username }}</h1>
+    <img class="rounded-circle" src="../static/img/avi/{{ playerTwo_username + p2image }}" style="margin-top:-25px; margin-left:5px; height: 50px; width: 50px; ">
+  </div><br>
+	<br><canvas style="float:left;"></canvas>
+	<div style="display:inline-block; border-radius:5px; width:350px; height:650px; background-color:#d3d9df;">
+  <br>
+  {% with game_error = get_flashed_messages(with_categories=true) %}
+    {% if game_error %}
+      <div class="alert alert-danger" style="width:255px">
+        <strong>Error:&nbsp</strong>{{ game_error[0][1] }}
+      </div>
+    {% endif %}
+  {% endwith %}<br>
+  {% if session.user_id == player_to_move and winner_id == None %}
+  	{% if request.args.get('state') %}
+  		<div class="alert alert-warning" style="margin-top:-20px; width:255px"><strong>Warning:&nbsp</strong>It is your turn to make a move</div><br>
+    {% elif pass_request %}
+      <div class="alert alert-warning" style="margin-top:-20px; width:255px">
+      {% if session.username == playerOne_username %}
+        {{ playerTwo_username }}
+      {% else %}
+        {{ playerOne_username }}
+      {% endif %}
+        has passed
+      </div><br>
+    {% endif %}
+	<form method=post novalidate>
+		<input type=submit class="btn btn-success" id="submit_move" name="submit_move" value="Submit Move: ?" style="max-width: 250px; margin:auto;">
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#passModal">Pass</button>
+<!-- Modal -->
+      <div class="modal fade" id="passModal" tabindex="-1" role="dialog" aria-labelledby="passModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+          <h5 class="modal-title" id="passModalLabel">Pass?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          </div>
+          <div class="modal-body">
+          Are you sure you would like to pass?
+          </div>
+          <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+          <input type=submit class="btn btn-danger" name="pass_move" value="Pass">
+          </div>
+        </div>
+        </div>
+      </div>
+		<!-- Button trigger modal -->
+		<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#forfeitModal">Forfeit Game</button>
+<!-- Modal -->
+			<div class="modal fade" id="forfeitModal" tabindex="-1" role="dialog" aria-labelledby="forfeitModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+				<div class="modal-content">
+				  <div class="modal-header">
+					<h5 class="modal-title" id="forfeitModalLabel">Forfeit Game?</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					  <span aria-hidden="true">&times;</span>
+					</button>
+				  </div>
+				  <div class="modal-body">
+					Are you sure you would like to forfeit this game?
+				  </div>
+				  <div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+					<input type=submit class="btn btn-danger" name="forfeit_game" value="Forfeit Game">
+				  </div>
+				</div>
+			  </div>
+			</div>
+    </form>
+    {% elif winner_id == None and pass_request == True %}
+  		<div class="alert alert-warning" style="margin-top:-20px; width:255px">Waiting for pass response</div><br>
+	{% elif winner_id == None and pass_request == False %}
+  <div class="alert alert-warning" style="margin-top:-20px; width:255px">Waiting for response</div>
+    {% elif winner_id != None and pass_request == True and dead_stones_query == None and session.user_id == player_to_move %}
+    <form method=post novalidate>
+    <input type=submit class="btn btn-success" id="submit_dead" name="submit_dead" value="Submit Dead Stones" style="max-width: 250px; margin:auto;">
+    <input type="hidden" id="submit_dead_value" name="submit_dead_value" value="">
+    </form>
+	{% elif winner_id != None and winner_id == 0 and pass_request == True and dead_stones != None and session.user_id == player_to_move%}
+	<form method=post novalidate>
+	  <input type=submit class="btn btn-success" name="accept_dead" value="Accept" style="max-width: 250px; margin:auto;">
+	  <input type=submit class="btn btn-danger" name="reject_dead" value="Reject" style="max-width: 250px; margin:auto;">
+	</form>
+	{% elif winner_id != None and winner_id == 0 and pass_request == True and dead_stones != None and session.user_id != player_to_move %}
+		<div class="alert alert-warning" style="margin-top:-20px; width:255px">Waiting for pass response</div><br>
+    {% else %}
+  	  {% if winner_id == session.user_id %}
+  		<div class="alert alert-success" style="margin-top:-20px; width:255px">You win!</div>
+  		{% else %}
+    		{% if winner_id == p1_id %}
+        <div class="alert alert-warning" style="margin-top:-20px; width:255px"><strong>{{playerOne_username}}</strong> wins!</div>
+    		{% else %}
+        <div class="alert alert-warning" style="margin-top:-20px; width:255px"><strong>{{playerTwo_username}}</strong> wins!</div>
+    		{% endif %}
+  	  {% endif %}
+    {% endif %}
+    {% for player in players: %}
+    <br><div class="rounded border border-secondary" style="width:300px; padding:10px; margin-left:25px">
+      <h2>{{ player[0] }}'s Stats</h2>
+      <p class="text-left">
+      <b>Wins: </b>{{ player[1] }}<br>
+      <b>Losses: </b>{{ player[2]-player[1] }}<br>
+      {% if player[2] != 0 %}
+      <b>Win rate: </b>{{ (player[1]/player[2]*100)|round(2) }}%<br>
+      {% endif %}
+      <b>Rating: </b>{{ player[3]|int }}<br>
+    </p>
+  </div>
+    {% endfor %}
+  </div><br>
+  {% if max_state_no != -1 %}
+	<div style="padding-top:5px; width:650px;">
+		<font size="5">
+
+		{% if request.args.get('state') == "0" %}
+			<button class="btn-dark" style="visibility:hidden" type="button" onclick="location.href='{{ url_for('games') + '/' + game_id + '?state=0'}}';">⏮️</button>
+			<button class="btn-secondary" type="button" style="visibility:hidden" onclick="location.href='{{ url_for('games') + '/' + game_id + '?state=0' }}'">⏪️</button>
+		{% else %}
+			<button class="btn-dark" type="button" onclick="location.href='{{ url_for('games') + '/' + game_id + '?state=0'}}';">⏮️</button>
+			{% if request.args.get('state') %}
+				<button class="btn-secondary" type="button" onclick="location.href='{{ url_for('games') + '/' + game_id + '?state=' + ((request.args.get('state')|int)-1)|string }}'">⏪️</button>
+			{% else %}
+				<button class="btn-secondary" type="button" onclick="location.href='{{ url_for('games') + '/' + game_id + '?state=' + max_state_no|string }}'">⏪️</button>
+			{% endif %}
+    {% endif %}
+
+
+		<div style="border-left: 2px solid black; padding-right:7px; height:30px; display:inline"></div>
+		{% if request.args.get('state') %}
+			{% if request.args.get('state')|int == max_state_no %}
+				<button class="btn-secondary" type="button" onclick="location.href='{{ url_for('games') + '/' + game_id }}'">⏩</button>
+			{% else %}
+				<button class="btn-secondary" type="button" onclick="location.href='{{ url_for('games') + '/' + game_id + '?state=' + ((request.args.get('state')|int)+1)|string }}'">⏩</button>
+			{% endif %}
+			<button class="btn-dark" type="button" onclick="location.href='{{ url_for('games') + '/' + game_id }}';">{% if session.user_id == player_to_move and (winner_id == None or winner_id == 0) %}🔴{%else%}⏭️{%endif%}</button>
+		{% else %}
+			<button class="btn-secondary" style="visibility:hidden" type="button" onclick="location.href='{{ url_for('games') + '/' + game_id }}'">⏩</button>
+			<button class="btn-dark" style="visibility:hidden" type="button" onclick="location.href='{{ url_for('games') + '/' + game_id }}';">{% if session.user_id == player_to_move %}🔴{%else%}⏭️{%endif%}</button>
+		{% endif %}
+		</font>
+	</div>
+  {% endif %}
+  </div>
+
+ {% if session.user_id != player_to_move and not request.args.get('state') and not winner_id %}
+  <meta http-equiv="refresh" content="2; URL={{ url_for('games') + '/' + game_id }}">
+ {% endif %}
+
+   <script>
+
+  // Function to check if two arrays are equal as there is no built-in function/method to do this due to the way JavaScript's == and === comparative operators work
+  function arraysEqual(a, b) {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+
+    for (var i = 0; i < a.length; ++i) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }
+
+  // Find the canvas tag on the HTML page
+  var canvas = document.querySelector('canvas'),
+  // Identify the context for the canvas (is it 2d? 3d? what is the purpose of the canvas? etc.)
+  ctx = canvas.getContext('2d');
+
+  // Set dimensions of the canvas
+  canvas.width = 650
+  canvas.height = 650
+
+  var prevPos = [-60,-60]; // An array that stores the row and column of the last placed stone ([-60,60] if not placed yet)
+  var illegalMoves = {{ illegalMoves|safe }}; // An array that is pulled from the back-end which contains the positions of all the places a user cannot place a stone on the board
+  illegalMoves.push([-60,-60]) // A placeholder value must be pushed (as it will be popped and another value will be pushed when a new stone is placed)
+  var posOfBlacks = {{ pos_of_blacks|safe }} // An array that stores the positions of all black stones on the board
+  var posOfWhites = {{ pos_of_whites|safe }} // An array that stores the positions of all white stones on the board
+
+  // If statements to determine whether to show the dead stones or not
+  {% if request.args.get('state') and winner_id != None %}
+  	{% if winner_id > 0 and request.args.get('state')|int != max_state_no %}
+  	  var posOfDeadStones = [];
+  	{% else %}
+  	  var posOfDeadStones = {{ dead_stones | safe }};
+  	{% endif %}
+  {% else %}
+  	{% if winner_id == 0 %}
+  		var posOfDeadStones = {{ dead_stones | safe }};
+  	{% else %}
+  		var posOfDeadStones = [];
+  	{% endif %}
+  {% endif %}
+
+  // Draws the ghost stone that appears when hovering the mouse over the board
+  function placeGhostStone(e, stone) {
+  	ctx.globalAlpha = 0.5;
+  	ctx.drawImage(stone, snapToPos(e.clientX-canvas.offsetLeft), snapToPos(e.clientY-canvas.offsetTop),60,60);
+  	ctx.globalAlpha = 1;
+  }
+
+  // Used to snap each x and y position of the mouse to a certain point on the board grid
+  function snapToPos(coord) {
+    return Math.round((coord)/65)*65-30
+  }
+
+  // Called when a new position on the board is clicked
+  function placePrevStone(e, stone) {
+    prevPos = [snapToPos(e.clientY-canvas.offsetTop),snapToPos(e.clientX-canvas.offsetLeft)]
+    ctx.drawImage(stone, prevPos[0], prevPos[1],60,60)
+  }
+
+  // Draws the hollow circle on the previously placed stone from the last move
+  function drawPrevPlaced() {
+    {% if request.args.get('state') %}
+      state_no = {{ request.args.get('state') }}
+    {% else %}
+      state_no = {{ max_state_no+1 }}
+    {% endif %}
+    opp_colour = (state_no % 2==0) ? "black" : "white"
+
+    if (state_no != 0) {
+      ctx.beginPath();
+      ctx.strokeStyle = opp_colour;
+      ctx.arc((prev_placed_stone[1]+1)*65,(prev_placed_stone[0]+1)*65,10,0, Math.PI*2);
+      ctx.stroke();
+      ctx.closePath();
+    }
+  }
+
+  // Function to draw all of the black and white stones (and dead stones if not empty as declared above) on the board
+  function drawStones(callbackForGhostX) {
+    black = new Image();
+    black.src = '../static/img/black.png';
+    black.onload = function () {
+      for (i in posOfBlacks) {
+        ctx.drawImage(black, posOfBlacks[i][1], posOfBlacks[i][0], 60, 60);
+      }
+      white = new Image();
+      white.src = '../static/img/white.png';
+      white.onload = function () {
+        for (i in posOfWhites) {
+          ctx.drawImage(white, posOfWhites[i][1], posOfWhites[i][0], 60, 60);
+        }
+  	dead = new Image();
+  	dead.src = '../static/img/logo.png';
+  	dead.onload = function () {
+  	  for (i in posOfDeadStones) {
+  		ctx.drawImage(dead, posOfDeadStones[i][1], posOfDeadStones[i][0], 60, 60);
+  	  }
+  	}
+        callbackForGhostX() // Callback function necessary due to aynschronous nature of JavaScript onload functions
+        drawPrevPlaced() // Draw the hollow circle after the stones have been drawn so that it is drawn on top of it
+      }
+    }
+  }
+
+  // Draw dead stones (if not declared as empty above if it is not yet the time to view dead stones) on the board
+  function drawDead() {
+    dead = new Image();
+    dead.src = '../static/img/dead.png';
+    dead.onload = function () {
+      for (i in posOfDeadStones) {
+        ctx.drawImage(dead, posOfDeadStones[i][1], posOfDeadStones[i][0], 60, 60);
+      }
+    }
+  }
+
+  // Initialise board - First function called which loads the board onto the canvas
+  function init_board(e, stone) {
+    ctx.globalAlpha = 1;
+    prev_placed_stone = {{ prev_placed_stone|safe }}
+    board = new Image();
+    board.src = '../static/img/board.png';
+    board.onload = function() {
+      ctx.fillStyle = "#CA9243";
+      ctx.fillRect(0, 0, 650, 650); // Draws over everything that was on the canvas before, thus resetting the board
+      ctx.drawImage(board, 12.5, 12.5); // Draw wooden board background
+      drawStones(callbackForGhostX);
+      function callbackForGhostX() { // Callback function necessary due to asynchronous nature of Javascript onload functions
+        drawDead();
+        if (e && stone) {
+          placeGhostStone(e, stone)
+        }
+      }
+
+    // Draw the grid lines on the board and the small black circles in the correct positions
+    ctx.beginPath();
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 1;
+    for (i = 0; i < 585; i+=65) {
+      ctx.moveTo(65+i,65);
+      ctx.lineTo(65+i,585);
+      ctx.moveTo(65,65+i);
+      ctx.lineTo(585,65+i);
+      ctx.stroke();
+      ctx.fillStyle = "black";
+      ctx.beginPath();
+      if (Math.floor((65+i)/65)%4 == 0) {
+        ctx.beginPath();
+        ctx.arc(i,195,5,0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(i,455,5,0, Math.PI*2);
+        ctx.fill();
+        }
+      ctx.font = "15px Arial";
+      ctx.fillText("ABCDEFGHI"[i/65],60+i,30)
+      ctx.fillText("ABCDEFGHI"[i/65],60+i,630)
+      ctx.fillText(9-i/65,20,70+i)
+      ctx.fillText(9-i/65,620,70+i)
+    }
+    ctx.arc(325,325,5,0, Math.PI*2);
+    ctx.fill();
+    ctx.closePath();
+    }
+  }
+
+  // Function to check if a move is illegal by checking if the row and column of the stone in that position is in the illegal moves array
+  function isMoveIllegal(e) {
+    for (var i in illegalMoves) {
+      if (arraysEqual(illegalMoves[i],[snapToPos(e.clientY-canvas.offsetTop),snapToPos(e.clientX-canvas.offsetLeft)])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Function called every time the mouse is moved which draws the "ghost" stone on the position where the mouse hovers over it
+  function drawGhostStone(e) {
+  	stone = new Image();
+  	stone.src = '../static/img/{{ colour }}.png';
+  	stone.onload = function() {
+  		if (e.clientX-canvas.offsetLeft >= 33 && e.clientX-canvas.offsetLeft <= 617 && e.clientY-canvas.offsetTop >= 33 && e.clientY-canvas.offsetTop <= 617
+      && !isMoveIllegal(e)) { // If the mouse is on the grid part of the board and is not on another stone (i.e. illegal)
+  			init_board(e, stone); // Draw the board and the ghost stone
+      } else {
+        init_board(); // Clear the board of the last ghost stone drawn
+      }
+        prevStone = new Image(); // Once the board has been re-drawn, the stone that has been placed by the user (if it has already been placed) must also be drawn
+        prevStone.src = '../static/img/{{ colour }}.png';
+        prevStone.onload = function() {
+          ctx.drawImage(prevStone,prevPos[1],prevPos[0],60,60);
+          // Draw the filled-in circle which indicates the stone that the user has placed
+          ctx.beginPath();
+          ctx.arc(prevPos[1]+30,prevPos[0]+30,10,0, Math.PI*2);
+          ctx.fillStyle="{{ colour }}"=="black" ? "white" : "black"
+          ctx.fill();
+          ctx.closePath();
+        }
+    }
+  }
+
+  // Simple function to turn the pixel coordinates of the stone on the board into Go coordinates
+  function CoordsToPos(coords) {
+    letters = "ABCDEFGHI"
+    col = (coords[1]-35)/65
+    row = 9-(coords[0]-35)/65
+
+    return letters[col]+row
+  }
+
+  // Function called when the 'mousedown' event occurs, i.e. the user clicks on the canvas
+  function placeStone(e) {
+    if (e.clientX-canvas.offsetLeft >= 33 && e.clientX-canvas.offsetLeft <= 617 && e.clientY-canvas.offsetTop >= 33 && e.clientY-canvas.offsetTop <= 617
+    && !isMoveIllegal(e)) { // Check if the mouse position is in range and is not in an illegal position
+      init_board(); // Reset the board
+  		stone = new Image();
+  		stone.src = '../static/img/{{ colour }}.png';
+      stone.onload = function() {
+        prevPos = [snapToPos(e.clientY-canvas.offsetTop),snapToPos(e.clientX-canvas.offsetLeft)]
+        ctx.drawImage(stone, prevPos[1], prevPos[0],60,60); // Draw the stone
+        // Draw the filled-in circle which indicates the stone that the user has placed
+        ctx.beginPath();
+        ctx.arc(prevPos[1]+30,prevPos[0]+30,10, 0, Math.PI*2);
+        ctx.fillStyle="{{ colour }}"=="black" ? "white" : "black"
+        ctx.fill();
+        ctx.closePath();
+
+        // The previous illegal move cannot be illegal now as it has been replaced by a new stone position, so it must be popped and the new illegal position should be pushed
+        illegalMoves.pop();
+        illegalMoves.push(prevPos);
+        // Update value of the 'Submit Move' button to be the Go coordinates of the new placed stone
+        var move_coords = function() {
+          return "Submit Move: "+ CoordsToPos(prevPos);
+        };
+        document.getElementById('submit_move').value = move_coords();
+      }
+  	}
+  }
+
+  // Function to check if a dead stone has already been placed in a certain position
+  function isXPlaced(e) {
+    for (var i in posOfDeadStones) {
+      if (arraysEqual(posOfDeadStones[i],[snapToPos(e.clientY-canvas.offsetTop),snapToPos(e.clientX-canvas.offsetLeft)])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Function called when the mouse is moved during the 'Submit Dead Stones' stage of the game - Draws a "ghost" dead stone image over the stones on the board where the mouse's position is
+  function drawGhostX(e) {
+    X = new Image();
+    X.src = '../static/img/dead.png';
+    X.onload = function() {
+      if (isMoveIllegal(e)) { // If the mouse is hovering over a stone
+        init_board(e, X); // Reset the board and draw the ghost dead stone image on top of the stone
+      } else {
+        init_board(); // Otherwise, just reset the board and remove the ghost stone drawn before
+      }
+    }
+  }
+
+  // Function called when the 'mousedown' event occurs during the 'Submit Dead Stones' stage of the game
+  function placeX(e) {
+    if (e.clientX-canvas.offsetLeft >= 33 && e.clientX-canvas.offsetLeft <= 617 && e.clientY-canvas.offsetTop >= 33 && e.clientY-canvas.offsetTop <= 617
+    && isMoveIllegal(e)) { // Check if the mouse position is in range and is in an illegal position (on a stone)
+      init_board(); // Reset the board
+      X = new Image();
+      X.src = '../static/img/dead.png';
+      X.onload = function() {
+        prevPos = [snapToPos(e.clientY-canvas.offsetTop),snapToPos(e.clientX-canvas.offsetLeft)]
+        if (isXPlaced(e)) { // If there already is a dead stone in that position,
+          for (i in posOfDeadStones) {
+            if (arraysEqual(posOfDeadStones[i],[snapToPos(e.clientY-canvas.offsetTop),snapToPos(e.clientX-canvas.offsetLeft)])) {
+              var index = i
+            }
+          }
+          posOfDeadStones.splice(index,1); // Remove the dead stone in that position
+        } else {
+          posOfDeadStones.push(prevPos); // If there isn't a dead stone there, then add a dead stone to that position
+        }
+        var dead_stones_pos = function() {
+          return posOfDeadStones;
+        };
+        document.getElementById('submit_dead_value').value = dead_stones_pos(); // Change the hidden field on the HTML page which contains the positions of the dead stones to be the new dead stones array
+      }
+    }
+  }
+
+  // Initialise board
+  init_board();
+
+  // Depending on the stage of the game (normal turn to move or dead stones submission), give permission for the user to modify the board
+  {% if session.user_id == player_to_move and not request.args.get('state') and not dead_stones_query %}
+    {% if winner_id == None %}
+    	canvas.addEventListener("mousemove", drawGhostStone);
+    	canvas.addEventListener("mousedown", placeStone);
+    {% else %}
+      canvas.addEventListener("mousemove", drawGhostX);
+      canvas.addEventListener("mousedown", placeX);
+    {% endif %}
+  {% endif %}
+	</script>
+{% endblock %}

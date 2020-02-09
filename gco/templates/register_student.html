@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container text-center">
+  <h1>Register a Student</h1>
+  <div class="container media-body text-left" style="height: 150px; display: inline-block; width:570px; padding-top: 10px; background-color: #dcdcdc; border-radius: .25rem;">
+    <h6 class="text-center">Rules:</h6>
+    <ul>
+      <li>Their username must only contain letters and numbers</li>
+      <li>Their username must be between 3 and 20 characters long</li>
+      <li>Their password must only contain letters, numbers, and a full stop</li>
+      <li>Their password must be at least 8 characters long</li>
+    </ul><br>
+  </div>
+  <form method=post novalidate>
+    <dl>
+      <dd><input type=text class="form-control" name="username" placeholder="Username" maxlength="20" value="{{ request.form.username }}" autofocus>
+      <!--<dd><input type=email class="form-control" name="email" placeholder="Email" maxlength="255" value="{{ request.form.email }}">-->
+      <dd><input type=password class="form-control" name="password" placeholder="Password" maxlength="255" value="{{ request.form.password }}">
+      <dd><input type=password class="form-control" name="confirm_password" placeholder="Confirm password" value="{{ request.form.confirm_password }}">
+      <dd><input type=password class="form-control" name="current_password" placeholder="Current password" value="{{ request.form.current_password }}">
+    </dl>
+    <p><input type=submit class="btn btn-md btn-primary btn-block" value=Register></p>
+  </form><br>
+  <h6 class="text-center">Already have an account? Click <a href="{{ url_for('login') }}">here</a> to log in</h6>
+</div>
+
+{% endblock %}

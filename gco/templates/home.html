@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block body %}
+  <div class="container jumbotron text-center">
+    <h1 style="margin-bottom:25px;">Home</h1>
+    <div class="card d-inline-block" style="width: 18rem;">
+      <img class="card-img-top" src="../static/img/go_board.jpg" alt="Card image cap">
+      <div class="card-body">
+        <h5 class="card-title">Challenge a user!</h5>
+        <p class="card-text">Click below to go to the users page where you can challenge anyone to a game of Go</p>
+        <a href="{{ url_for('users') }}" style="margin-top:10px" class="btn btn-primary">Go to Users</a>
+      </div>
+    </div>
+    {% if not session.is_admin %}
+    <div class="card d-inline-block" style="width: 18rem;">
+      <img class="card-img-top" src="../static/img/make-friends.jpg" alt="Card image cap">
+      <div class="card-body">
+        <h5 class="card-title">Make new friends!</h5>
+        <p class="card-text">Click below to go to the friends page where you can view and add friends<br>&nbsp</p>
+        <a href="{{ url_for('friends') }}" style="margin-top:10px" class="btn btn-primary">Go to Friends</a>
+      </div>
+    </div>
+    {% else %}
+    <div class="card d-inline-block" style="width: 18rem;">
+      <img class="card-img-top" src="../static/img/moderate.jpg" alt="Card image cap">
+      <div class="card-body">
+        <h5 class="card-title">Moderate users</h5>
+        <p class="card-text">Click below to go to the users page where you can view and moderate users</p>
+        <a href="{{ url_for('users') }}" style="margin-top:10px" class="btn btn-primary">Go to Users</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+{% endblock %}

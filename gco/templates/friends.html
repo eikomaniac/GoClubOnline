@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container jumbotron">
+  <h1 class="text-center">Friends</h1>
+  <div>
+	{% if not users %}
+	<p style="text-align:center; color: gray"><img height="100px" src="../static/img/wumpus.png">
+	Wumpus doesn't have any friends... but you could!</p><br>
+	<form method=post enctype='multipart/form-data' novalidate>
+	<input type=submit class="btn btn-success" name="goto_users" value="Add Friends!" style="max-width: 250px; margin:auto; display:block">
+	</form>
+	{% else %}
+		<form class="form-inline mt-2 mt-md-0" method=post>
+		  <div style="margin:auto;">
+		  <input class="form-control mr-sm-2" type="text" placeholder="Profile" name="search" value="{{ request.form.search }}" autofocus>
+		  <input type=submit class="btn btn-outline-dark my-2 my-sm-0" value=Search>
+		  </div>
+		</form><br>
+			<table class="table table-hover" style="margin:auto; max-width:50%;">
+		<tbody>
+			{% for row in users %}
+			<tr>
+			  <th><img class="rounded-circle profile-img" src="static/img/avi/{{ row[1] + row[2] }}" style="height: 50px; width: 50px; "></th>
+			  <td><a href="users/{{ row[0] }}">{{ row[1] }}</a></td><td></td><td>
+			  {% if row[0] in request_to_list %}
+				<td>
+				<form method=post enctype='multipart/form-data' novalidate>
+				<input type=hidden name="friend_button" value="[{{ row[0] }}, 'Cancel Pending Request']">
+				<input type=submit class="btn btn-warning" name="friend_button" value="Cancel Pending Request" style="max-width: 250px; margin:auto;">
+				</form></td><td>
+			  {% elif row[0] in request_from_list %}
+				<form method=post enctype='multipart/form-data' novalidate>
+				  <input type=hidden name="friend_button" value="[{{ row[0] }}, 'Accept Friend Request']">
+				  <input type=submit class="btn btn-success" name="friend_button" value="Accept Friend Request" style="max-width: 250px; margin:auto;"></form></td><td>
+					<form method=post enctype='multipart/form-data' novalidate>
+				  <input type=hidden name="friend_button" value="[{{ row[0] }}, 'Decline Friend Request']">
+				  <input type=submit class="btn btn-danger" name="friend_button" value="Decline Friend Request" style="max-width: 250px; margin:auto;"></form></td>
+			  {% endif %}
+			</tr>
+			{% endfor %}
+		{% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
